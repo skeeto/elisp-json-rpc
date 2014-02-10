@@ -18,6 +18,7 @@
 ;; TODO:
 ;;  * asynchronous requests
 ;;  * response timeout
+;;  * detect auth rejection
 
 ;;; Code:
 
