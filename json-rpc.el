@@ -61,7 +61,8 @@
                                             :family 'ipv4
                                             :coding '(utf-8 . utf-8))))
         (setf (process-sentinel process)
-              (lambda (proc _) (kill-buffer (process-buffer proc))))
+              (lambda (proc _)
+                (run-at-time 0 nil #'kill-buffer (process-buffer proc))))
         (prog1 connection
           (setf (json-rpc-process connection) process))))))
 
