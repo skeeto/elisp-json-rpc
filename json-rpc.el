@@ -31,7 +31,7 @@
 
 ;; Set up error condition.
 (setf (get 'json-rpc-error 'error-conditions) '(json-rpc-error error)
-      (get 'json-rpc-error 'error-message) "JSON-RPC error condition.")
+      (get 'json-rpc-error 'error-message) "JSON-RPC error condition")
 
 (defun json-rpc-connect (host port &optional username password)
   "Create a JSON-RPC HTTP connection to HOST:PORT."
