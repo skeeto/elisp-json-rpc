@@ -40,6 +40,12 @@
     (json-rpc-ensure
      (json-rpc--create :host host :port port-num :auth auth :id-counter 0))))
 
+(defun json-rpc-close (connection)
+  "Close TCP connection in CONNECTION."
+  (let ((process (json-rpc-process connection)))
+    (when (and process (process-live-p process))
+      (process-send-eof process))))
+
 (defun json-rpc-ensure (connection)
   "Re-establish connection to CONNECTION if needed, returning CONNECTION."
   (let ((old-process (json-rpc-process connection)))
@@ -93,6 +99,14 @@
                     (signal 'json-rpc-error (plist-get result :error))
                   (cl-return (plist-get result :result)))))))
         (accept-process-output)))))
+
+(defmacro json-rpc-with-connection (var-and-spec &rest body)
+  (declare (indent 1))
+  (cl-destructuring-bind (var . spec) var-and-spec
+    `(let ((,var (json-rpc-connect ,@spec)))
+       (unwind-protect
+           (progn ,@body)
+         (json-rpc-close ,var)))))
 
 (provide 'json-rpc)
 
