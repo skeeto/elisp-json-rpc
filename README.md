@@ -4,14 +4,14 @@
 
 ```el
 ;; Establish a connection to bitcoind:
-(setf rpc (json-rpc-connect "localhost" 8332 "bitcoinrpc" "mypassword"))
+(setf bitcoind (json-rpc-connect "localhost" 8332 "bitcoinrpc" "mypassword"))
 
-(json-rpc-request rpc "getblockcount")
+(json-rpc bitcoind "getblockcount")
 ;; => 285031
 
-(json-rpc-request rpc "setgenerate" t 3)
+(json-rpc bitcoind "setgenerate" t 3)
 ;; => nil
 
-(json-rpc-request foo "bogusmethod")
+(json-rpc bitcoind "bogusmethod")
 ;; signals (json-rpc-error :message "Method not found" :code -32601)
 ```

@@ -4,16 +4,16 @@
 
 ;;; Commentary:
 
-;; The two important functions are `json-rpc-connect' and
-;; `json-rpc-request'. The first one returns a connection object and
-;; the second one makes synchronous requests on the connection,
-;; returning the result or signaling an error.
+;; The two important functions are `json-rpc-connect' and `json-rpc'.
+;; The first one returns a connection object and the second one makes
+;; synchronous requests on the connection, returning the result or
+;; signaling an error.
 
 ;; Here's an example using the bitcoind JSON-RPC API:
 
 ;; (setf rpc (json-rpc-connect "localhost" 8332 "bitcoinrpc" "mypassword"))
-;; (json-rpc-request rpc "getblockcount")  ; => 285031
-;; (json-rpc-request rpc "setgenerate" t 3)
+;; (json-rpc rpc "getblockcount")  ; => 285031
+;; (json-rpc rpc "setgenerate" t 3)
 
 ;; TODO:
 ;;  * asynchronous requests
@@ -56,7 +56,7 @@
         (prog1 connection
           (setf (json-rpc-process connection) process))))))
 
-(defun json-rpc-request (connection method &rest params)
+(defun json-rpc (connection method &rest params)
   "Send request of METHOD to CONNECTION, returning result or signalling error."
   (let* ((id (cl-incf (json-rpc-id-counter connection)))
          (vparams (vconcat params))
