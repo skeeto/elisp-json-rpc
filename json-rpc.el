@@ -110,6 +110,13 @@
         (accept-process-output)))))
 
 (defmacro json-rpc-with-connection (var-and-spec &rest body)
+  "Open a temporary RPC connection, evaluate BODY, and close the connection.
+The connection will close even if evaluation results in an error.
+
+    (json-rpc-with-connection (btc \"localhost\" 8332 \"bitcoinrpc\" \"pw\")
+      (message \"bitcoind status: %d blocks, %f BTC\"
+               (json-rpc btc \"getblockcount\")
+               (json-rpc btc \"getbalance\")))"
   (declare (indent 1))
   (cl-destructuring-bind (var . spec) var-and-spec
     `(let ((,var (json-rpc-connect ,@spec)))
