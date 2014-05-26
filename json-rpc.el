@@ -2,6 +2,11 @@
 
 ;; This is free and unencumbered software released into the public domain.
 
+;; Author: Christopher Wellons <wellons@nullprogram.com>
+;; URL: https://github.com/skeeto/elisp-json-rpc
+;; Version: 0.0.1
+;; Package-Requires: ((cl-lib "0.5"))
+
 ;;; Commentary:
 
 ;; The two important functions are `json-rpc-connect' and `json-rpc'.
