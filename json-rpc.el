@@ -97,7 +97,7 @@
         (setf (point) (point-min))
         (when (search-forward "Content-Length: " nil t)
           (let ((length (read (current-buffer))))
-            (search-forward "\r\n\r\n")
+            (search-forward-regexp "\r?\n\r?\n" nil t)
             (when (<= length (- (position-bytes (point-max))
                                 (position-bytes (point))))
               (let* ((json-object-type 'plist)
