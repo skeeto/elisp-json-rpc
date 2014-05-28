@@ -84,8 +84,7 @@
     (with-temp-buffer
       (insert "POST / HTTP/1.1\r\n")
       (when auth (insert "Authorization: Basic " auth "\r\n"))
-      (insert (format "Content-Length: %d" (string-bytes encoded))
-              "\r\n\r\n"
+      (insert (format "Content-Length: %d\r\n\r\n" (string-bytes encoded))
               encoded)
       (process-send-region process (point-min) (point-max)))
     (json-rpc-wait connection)))
