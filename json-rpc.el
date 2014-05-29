@@ -71,6 +71,10 @@
         (prog1 connection
           (setf (json-rpc-process connection) process))))))
 
+(defun json-rpc-live-p (connection)
+  "Return non-nil if CONNECTION is still connected."
+  (process-live-p (json-rpc-process connection)))
+
 (defun json-rpc (connection method &rest params)
   "Send request of METHOD to CONNECTION, returning result or signalling error."
   (let* ((id (cl-incf (json-rpc-id-counter connection)))
@@ -89,23 +93,33 @@
       (process-send-region process (point-min) (point-max)))
     (json-rpc-wait connection)))
 
+(defun json-rpc--move-to-content ()
+  "Move the point to after the headers."
+  (setf (point) (point-min))
+  (search-forward-regexp "\r?\n\r?\n" nil t))
+
+(defun json-rpc--content-finished-p ()
+  "Return non-nil if all of the content has arrived."
+  (setf (point) (point-min))
+  (when (search-forward "Content-Length: " nil t)
+    (let ((length (read (current-buffer))))
+      (json-rpc--move-to-content)
+      (<= length (- (position-bytes (point-max)) (position-bytes (point)))))))
+
 (defun json-rpc-wait (connection)
   "Wait for the response from CONNECTION and return it, or signal the error."
   (with-current-buffer (process-buffer (json-rpc-process connection))
     (cl-block nil
       (while t
-        (setf (point) (point-min))
-        (when (search-forward "Content-Length: " nil t)
-          (let ((length (read (current-buffer))))
-            (search-forward-regexp "\r?\n\r?\n" nil t)
-            (when (<= length (- (position-bytes (point-max))
-                                (position-bytes (point))))
-              (let* ((json-object-type 'plist)
-                     (json-key-type 'keyword)
-                     (result (json-read)))
-                (if (plist-get result :error)
-                    (signal 'json-rpc-error (plist-get result :error))
-                  (cl-return (plist-get result :result)))))))
+        (when (or (json-rpc--content-finished-p)
+                  (not (json-rpc-live-p connection)))
+          (json-rpc--move-to-content)
+          (let* ((json-object-type 'plist)
+                 (json-key-type 'keyword)
+                 (result (json-read)))
+            (if (plist-get result :error)
+                (signal 'json-rpc-error (plist-get result :error))
+              (cl-return (plist-get result :result)))))
         (accept-process-output)))))
 
 (defmacro json-rpc-with-connection (var-and-spec &rest body)
