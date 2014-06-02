@@ -103,8 +103,9 @@
   (setf (point) (point-min))
   (when (search-forward "Content-Length: " nil t)
     (let ((length (read (current-buffer))))
-      (json-rpc--move-to-content)
-      (<= length (- (position-bytes (point-max)) (position-bytes (point)))))))
+      (and (json-rpc--move-to-content)
+           (<= length (- (position-bytes (point-max))
+                         (position-bytes (point))))))))
 
 (defun json-rpc-wait (connection)
   "Wait for the response from CONNECTION and return it, or signal the error."

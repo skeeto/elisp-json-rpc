@@ -20,6 +20,11 @@
     (should (>= (json-rpc bitcoind "getbalance") 0.0))
     (should-error (json-rpc "bogusmethod" 1 2 3))))
 
+(ert-deftest json-rpc-incomplete-response ()
+  (insert "HTTP/1.1 200 OK\r\n"
+          "Content-Length: 10\r\n")
+  (should-not (json-rpc--content-finished-p)))
+
 (provide 'json-rpc-tests)
 
 ;;; json-rpc-tests.el ends here
