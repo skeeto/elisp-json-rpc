@@ -68,6 +68,7 @@
         (setf (process-sentinel process)
               (lambda (proc _)
                 (run-at-time 0 nil #'kill-buffer (process-buffer proc))))
+        (set-process-query-on-exit-flag process nil)
         (prog1 connection
           (setf (json-rpc-process connection) process))))))
 
