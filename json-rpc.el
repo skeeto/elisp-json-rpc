@@ -63,7 +63,6 @@
                                             :buffer buffer
                                             :host host
                                             :service (json-rpc-port connection)
-                                            :family 'ipv4
                                             :coding '(utf-8 . utf-8))))
         (setf (process-sentinel process)
               (lambda (proc _)
