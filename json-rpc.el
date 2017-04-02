@@ -88,7 +88,7 @@
     (with-temp-buffer
       (insert (format "POST %s HTTP/1.1\r\n" (url-encode-url endpoint)))
       (when auth (insert "Authorization: Basic " auth "\r\n"))
-      (insert "Content-Type: application/json\r\n")      
+      (insert "Content-Type: application/json\r\n")
       (insert (format "Content-Length: %d\r\n\r\n" (string-bytes encoded))
               encoded)
       (process-send-region process (point-min) (point-max)))
