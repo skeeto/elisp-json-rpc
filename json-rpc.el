@@ -42,7 +42,7 @@
 (defun json-rpc-connect (host port &optional username password)
   "Create a JSON-RPC HTTP connection to HOST:PORT."
   (let ((auth (when (and username password)
-                (base64-encode-string (format "%s:%s" username password))))
+                (base64-encode-string (format "%s:%s" username password) t)))
         (port-num (if (stringp port) (read port) port)))
     (json-rpc-ensure
      (json-rpc--create :host host :port port-num :auth auth :id-counter 0))))
