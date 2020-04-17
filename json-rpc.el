@@ -31,6 +31,16 @@
 (require 'json)
 (require 'cl-lib)
 
+(defcustom json-rpc-poll-seconds 0.5
+  "Number of seconds as integer or float to poll between `accept-process-output' calls."
+  :type 'number
+  :group 'json-rpc)
+
+(defcustom json-rpc-poll-max-seconds 60
+  "Number of seconds as integer to wait for `json-rpc-wait'."
+  :type 'number
+  :group 'json-rpc)
+
 (cl-defstruct (json-rpc (:constructor json-rpc--create))
   "A connection to a remote JSON-RPC server."
   process host port auth id-counter)
@@ -132,18 +142,21 @@ Returns the result or signals the error."
 (defun json-rpc-wait (connection)
   "Wait for the response from CONNECTION and return it, or signal the error."
   (with-current-buffer (process-buffer (json-rpc-process connection))
-    (cl-block nil
-      (while t
-        (when (or (json-rpc--content-finished-p)
-                  (not (json-rpc-live-p connection)))
-          (json-rpc--move-to-content)
-          (let* ((json-object-type 'plist)
-                 (json-key-type 'keyword)
-                 (result (json-read)))
-            (if (plist-get result :error)
-                (signal 'json-rpc-error (plist-get result :error))
-              (cl-return (plist-get result :result)))))
-        (accept-process-output)))))
+    (unless (cl-loop repeat (max 1 (truncate (/ json-rpc-poll-max-seconds
+						json-rpc-poll-seconds)))
+		     for done-p = (or (json-rpc--content-finished-p)
+				      (not (json-rpc-live-p connection)))
+		     until done-p
+		     do (accept-process-output nil json-rpc-poll-seconds)
+		     finally return done-p)
+      (signal 'json-rpc-error "Timeout"))
+    (json-rpc--move-to-content)
+    (let* ((json-object-type 'plist)
+	   (json-key-type 'keyword)
+	   (result (json-read)))
+      (if (plist-get result :error)
+	  (signal 'json-rpc-error (plist-get result :error))
+	(plist-get result :result)))))
 
 (defmacro json-rpc-with-connection (var-and-spec &rest body)
   "Open a temporary RPC connection, evaluate BODY, and close the connection.
