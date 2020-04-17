@@ -144,11 +144,11 @@ Returns the result or signals the error."
   (with-current-buffer (process-buffer (json-rpc-process connection))
     (unless (cl-loop repeat (max 1 (truncate (/ json-rpc-poll-max-seconds
 						json-rpc-poll-seconds)))
-		     for done-p = (or (json-rpc--content-finished-p)
+		     until (or (json-rpc--content-finished-p)
 				      (not (json-rpc-live-p connection)))
-		     until done-p
 		     do (accept-process-output nil json-rpc-poll-seconds)
-		     finally return done-p)
+		     finally return (or (json-rpc--content-finished-p)
+					(not (json-rpc-live-p connection))))
       (signal 'json-rpc-error "Timeout"))
     (json-rpc--move-to-content)
     (let* ((json-object-type 'plist)
